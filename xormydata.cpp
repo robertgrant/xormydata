@@ -18,7 +18,7 @@ using std::ios_base;
 // args: infile incode outfile [startcode remove?]
 int main(int argc, char *argv[]) {
 	// get arguments
-	if(argc!=4) {
+	if(argc<4) {
 	    cerr << "Arguments missing: should be input file, then coding file, then output file" << endl;
 	    return -1;
 	}
@@ -26,9 +26,15 @@ int main(int argc, char *argv[]) {
 	string infile;
 	string incode;
 	string outfile;
+	stringstream stringstartcode;
 	infile = argv[1];
 	incode = argv[2];
 	outfile = argv[3];
+	int startcode = 0;
+	if(argc==5) {
+		stringstartcode << argv[4];
+		stringstartcode >> startcode;
+	}
 
 	// get infile size
 	int insize=0;
@@ -37,7 +43,6 @@ int main(int argc, char *argv[]) {
   inst.seekg(0,ios_base::end);
   insize = inst.tellg();
 	inst.seekg(0,ios_base::beg);
-	cout << "Input file length: " << insize << " bytes" << endl;
 
 	// get codefile size
 	int codesize=0;
@@ -45,11 +50,14 @@ int main(int argc, char *argv[]) {
   codest.open(incode, ios_base::binary);
   codest.seekg(0,ios_base::end);
   codesize = codest.tellg();
-  codest.seekg(0,ios_base::beg);
+	codesize = codesize - startcode;
+  codest.seekg(startcode,ios_base::beg);
 	if (codesize < insize) {
-		cerr << "Error! The coding file is smaller than the input file." << endl;
+		cerr << "Error! The coding file (from the start point) is smaller than the input file." << endl;
+		cout << "Input file length: " << insize << " bytes" << endl;
+		cout << "Coding file length: " << codesize << " bytes" << endl;
+
 	}
-	cout << "Coding file length: " << codesize << " bytes" << endl;
 
 
 	/* Note: If you are a GNU g++ user (version 2.7.x or earlier), then do not use i/o mode flags when opening ifstream objects. Because of a bug in the GNU libg++ implementation, the flags will not be correctly interpreted. If you are working under Unix, omit the i/o mode flags entirely; if you are working with g++ under MS-DOS, then use an fstream object. This note applies to g++ users only.
@@ -78,9 +86,9 @@ int main(int argc, char *argv[]) {
 								break;
 							}
 							inchar = inbuff[0];
-							cout << "inchar:" << inchar << endl;
+//						cout << "inchar:" << inchar << endl;
 							inint = (char)inchar;
-							cout << "inint:" << inint << endl;
+//							cout << "inint:" << inint << endl;
 							inbytes = inst.gcount(); 	// get number of bytes read from infile
 							if(!codest) {
 									cerr << "Error when attempting to read from the coding file" << endl;
@@ -89,9 +97,9 @@ int main(int argc, char *argv[]) {
 							else {
 									codest.read(codebuff, 1);
 									codechar = codebuff[0];
-									cout << "codechar:" << codechar << endl;
+//									cout << "codechar:" << codechar << endl;
 									codeint = (char)codechar;
-									cout << "codeint:" << codeint << endl;
+//									cout << "codeint:" << codeint << endl;
 									codebytes = codest.gcount(); 	// get number of bytes read from codefile
 									outint = inint ^ codeint;
 									outchar = (int)outint;
