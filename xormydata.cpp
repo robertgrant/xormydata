@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
   codesize = codest.tellg();
   codest.seekg(0,ios_base::beg);
 	if (codesize < insize) {
-		cerr << "Warning! The coding file is smaller than the input file. Coding will repeat from the beginning. Technically, this increases the risk of code breaking." << endl;
+		cerr << "Error! The coding file is smaller than the input file." << endl;
 	}
 	cout << "Coding file length: " << codesize << " bytes" << endl;
 
@@ -72,10 +72,15 @@ int main(int argc, char *argv[]) {
 	int codeint;
 	int outint;
 	if(inst) {
-	        while(!inst.eof()) {
+	        while(true) {
 							inst.read(inbuff, 1);
+							if(inst.eof()) {
+								break;
+							}
 							inchar = inbuff[0];
+							cout << "inchar:" << inchar << endl;
 							inint = (char)inchar;
+							cout << "inint:" << inint << endl;
 							inbytes = inst.gcount(); 	// get number of bytes read from infile
 							if(!codest) {
 									cerr << "Error when attempting to read from the coding file" << endl;
@@ -84,7 +89,9 @@ int main(int argc, char *argv[]) {
 							else {
 									codest.read(codebuff, 1);
 									codechar = codebuff[0];
+									cout << "codechar:" << codechar << endl;
 									codeint = (char)codechar;
+									cout << "codeint:" << codeint << endl;
 									codebytes = codest.gcount(); 	// get number of bytes read from codefile
 									outint = inint ^ codeint;
 									outchar = (int)outint;
