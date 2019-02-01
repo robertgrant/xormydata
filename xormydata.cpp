@@ -35,6 +35,14 @@ int main(int argc, char *argv[]) {
 		stringstartcode << argv[4];
 		stringstartcode >> startcode;
 	}
+	else {
+		string startcin;
+		cout << "Coding file start byte:" << endl;
+		getline(cin,startcin);
+		if(startcin.length() > 0) {
+			stringstream(startcin) >> startcode;
+		}
+	}
 
 	// get infile size
 	int insize=0;
