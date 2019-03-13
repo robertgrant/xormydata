@@ -2,6 +2,8 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <termios.h>
+#include <unistd.h>
 #include <sys/stat.h>
 using std::ios;
 using std::cin;
@@ -38,10 +40,16 @@ int main(int argc, char *argv[]) {
 	else {
 		string startcin;
 		cout << "Coding file start byte:" << endl;
+    termios oldt;
+    tcgetattr(STDIN_FILENO, &oldt);
+    termios newt = oldt;
+    newt.c_lflag &= ~ECHO;
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
 		getline(cin,startcin);
 		if(startcin.length() > 0) {
 			stringstream(startcin) >> startcode;
 		}
+		tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 	}
 
 	// get infile size
