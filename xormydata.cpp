@@ -33,10 +33,53 @@ int main(int argc, char *argv[]) {
 	incode = argv[2];
 	outfile = argv[3];
 	int startcode = 0;
+	// first, the completely specified arguments: data file, code file, outfile, start byte
 	if(argc==5) {
 		stringstartcode << argv[4];
 		stringstartcode >> startcode;
 	}
+	// now, data file, outfile, and the secret tag (-s or --secret)
+	else if(argc==4 && (outfile=="-s" || outfile=="--secret")) {
+		outfile = incode; // locations reverse
+		// get code file
+		string codecin;
+		string startcin;
+		cout << "Coding file:" << endl;
+    termios oldt;
+    tcgetattr(STDIN_FILENO, &oldt);
+    termios newt = oldt;
+    newt.c_lflag &= ~ECHO;
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+		getline(cin,codecin);
+		if(codecin.length() > 0) {
+			stringstream(codecin) >> incode;
+		}
+		else {
+			cerr << "Error! No code file has been specified." << endl;
+			return -2;
+		}
+		tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+		// get start byte
+		cout << "Coding file start byte:" << endl;
+    /*
+		termios oldt;
+    tcgetattr(STDIN_FILENO, &oldt);
+    termios newt = oldt;
+    newt.c_lflag &= ~ECHO;
+		*/
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+		getline(cin,startcin);
+		if(startcin.length() > 0) {
+			stringstream(startcin) >> startcode;
+		}
+		else {
+			cout << "Warning! No start byte has been specified." << endl;
+			cout << "Coding will start at the beginning of the code file, which may be vulnerable to attack because of predictable metadata." << endl;
+		}
+		tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+
+	}
+	// now, the data file, code file and outfile
 	else {
 		string startcin;
 		cout << "Coding file start byte:" << endl;
@@ -108,7 +151,7 @@ int main(int argc, char *argv[]) {
 							inbytes = inst.gcount(); 	// get number of bytes read from infile
 							if(!codest) {
 									cerr << "Error when attempting to read from the coding file" << endl;
-									return -1;
+									return -3;
 							}
 							else {
 									codest.read(codebuff, 1);
@@ -126,7 +169,7 @@ int main(int argc, char *argv[]) {
 	}
 	else {
 		  cerr << "Error when attempting to read from the input file" << endl;
-			return -1;
+			return -4;
   }
 	inst.close();
 	codest.close();
